@@ -9,4 +9,4 @@ unity项目转cocos creator,需要将lua转为ts.很多语法与符号不同,改
 ## 用法
 > python lua2ts.py [filePath(不带扩展名)]
 
-Windows: 拖拽文件至lua2ts.bat
+Windows: 拖拽文件至lua2ts.bat(自行修改脚本路径)
