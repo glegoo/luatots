@@ -7,6 +7,7 @@ unity项目转cocos creator,需要将lua转为ts.很多语法与符号不同,改
 通过正则改写语法,符号等等. 具体请参考代码.
 
 ## 用法
-> python lua2ts.py [filePath(不带扩展名)]
-###参数
+> python lua2ts.py [filePath(不带扩展名)] -option
+
+option:
 > -u2cc         使用Unity转Cocos Creator
