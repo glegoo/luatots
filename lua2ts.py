@@ -62,6 +62,7 @@ with open(sys.argv[1] + ".lua", "r") as f:
             result = re.sub(r"(\w+(\.\w+)*?):Find\(('\w+(\/\w+)+')\)", "cc.find(\\3, \\1)", result)
             result = re.sub(r"(\w+(\.\w+)*?):Find\(('.*')\)", "\\1.getChildByName(\\3)", result)
             result = re.sub(r":SetActive\((.*)\)", ".active = \\1", result)
+            result = re.sub(r"\.activeSelf", ".active", result)
             result = re.sub(r":GetChild\((.*)\)", ".children[\\1]", result)
             # 自用
             result = re.sub(r"Util.ClearChild\((.*)\)", "\\1.removeAllChildren()", result)
