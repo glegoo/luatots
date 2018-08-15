@@ -2,28 +2,30 @@
 import re
 import sys
 
-with open(sys.argv[1] + ".lua", "r") as f:
+filePath = sys.argv[1]
+# filePath = "ActivityCtrl"
+# 检查是否为Unity转cc
+isU2cc = '-u2cc' in sys.argv
+
+with open(filePath + ".lua", "r") as f:
+    print filePath
     file = f.read()
-    className = re.findall(r"\b(.*) = \{\}\nlocal this = \1", file)
+    className = filePath
     if className:
-        print "export class", className[0]
-
-        # 检查是否为Unity转cc
-        isU2cc = '-u2cc' in sys.argv
-
-        className = className[0]
+        print "export class", className
+        
         # 块注释
         result = re.sub(r"--\[\[((.*\n)*?.*?)\]\]", "/*\\1*/", file)
         # 类
         result = re.sub(r"\b(.*) = \{\}\nlocal this = \1\n", "export class " + className + "{\n", result)
         result = re.sub(r"" + className + "\.", "this.", result)        
         # 局部变量
-        result = re.sub(r"\tlocal(.*=)", "\tlet\\1", result)
+        result = re.sub(r"[\t|\s]local(.*=)", "\tlet\\1", result)
         # 成员变量
         result = re.sub(r"\blocal m_(.*)", "private _\\1", result)
-        result = re.sub(r"([^private])m_(\w+)", "\\1this._\\2", result)
+        result = re.sub(r"([^(private)]) m_(\w+)", "\\1this._\\2", result)
         if isU2cc:
-            result = re.sub(r"_transform", "_root", result)
+            result = re.sub(r"_transform", "node", result)
         # 整体缩进
         result = re.sub(r"\n", "\n\t", result)
         # 类结束
@@ -45,12 +47,15 @@ with open(sys.argv[1] + ".lua", "r") as f:
         result = re.sub(r"--(.*\n)", "//\\1", result)
         result = re.sub(r"\bend\s*\n", "}\n", result)
         # 函数 
-        result = re.sub(r"\bfunction " + className + r"\.(.*)", "\\1 {", result)
-        result = re.sub(r"\bfunction this\.(.*)", "\\1 {", result)
+        result = re.sub(r"\bfunction " + className + r"[\.|:](.*)", "\\1 {", result)
+        result = re.sub(r"\bfunction this[\.|:](.*)", "\\1 {", result)
         result = re.sub(r"(\bfunction\(.*\))(.*)\n", "\\1{\\2\n", result)
         result = re.sub(r"end(,|\)|\s.*)", "}\\1", result)
         result = re.sub(r"New(\(\) {)", "constructor\\1", result)
         result = re.sub(r"string\.gsub\((.*?), (.*?), (.*)\)", "\\1.replace(\\2, \\3)", result)
+        result = re.sub(r"string\.find\((.*),([^\)]*)\)", "\\1.includes(\\2)", result)
+        result = re.sub(r"[\t|\s]log\(", "console.log(", result)
+
         if isU2cc:
             result = re.sub(r":GetComponent", ".getComponent", result)
             result = re.sub(r"'UILabel'", "cc.Label", result)
@@ -77,5 +82,5 @@ with open(sys.argv[1] + ".lua", "r") as f:
         # nil 转 null
         result = re.sub(r"nil", "null", result)
         
-        with open(sys.argv[1] + ".ts", "w") as f:
+        with open(filePath + ".ts", "w") as f:
             f.write(result)
